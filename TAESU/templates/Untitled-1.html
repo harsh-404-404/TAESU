@@ -1,0 +1,121 @@
+
+THis is the main stuctuer for todays reminder
+
+               <li class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="form-check div_containg_note">
+                        <input class="form-check-input me-2 cheakbox_reminder" type="checkbox" id="reminder1" data-id="${x.id}">
+                        <label class="form-check-label note_reminder" for="reminder1">${x.note}</label>
+                    </div>
+                    <div class="div_containg_btn">
+                        <i class="fas fa-edit text-warning me-2 edit_btn_reminder" role="button" data-id="${x.id}"></i>
+                        <i class="fas fa-trash text-danger delete_btn_reminder" role="button" data-id="${x.id}"></i>
+                    </div>
+                </li>
+
+
+
+
+
+
+
+
+This is secondery stucture (when note is cheaked)
+                <li class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="form-check div_containg_note">
+                        <input class="form-check-input me-2 cheakbox_reminder" type="checkbox" id="reminder2" checked data-id="${x.id}">
+                        <label class="form-check-label note_reminder" for="reminder2"><s>${x.note}</s></label>
+                    </div>
+                    <div class="div_containg_btn">
+                        <i class="fas fa-edit text-secondary me-2 edit_btn_reminder" role="button" data-id="${x.id}"></i>
+                        <i class="fas fa-trash text-secondary delete_btn_reminder" role="button" data-id="${x.id}"></i>
+                    </div>
+                </li>
+
+
+
+
+
+
+
+
+
+This is a stucture for tomorrows reminder
+
+
+               <li class="d-flex align-items-center justify-content-between mb-2">
+                    <span>{x.note}</span>
+                    <i class="fas fa-trash text-danger delete_btn_reminder" role="button" data-id="${x.id}"></i>
+                </li>
+
+
+
+
+This is a stucture for deadline
+
+
+            <li class="list-group-item text-white d-flex justify-content-between align-items-center deadline_item">
+                <div>
+                    <div class="fw-semibold">Project Submission</div>
+                    <small class="text-warning" id="time_${x.id}">2d 3h 15m left</small>
+                </div>
+                <button class="btn btn-sm btn-outline-danger py-0 px-2 " data-id="${x.id}">Delete</button>
+            </li>
+
+
+
+This is a stucture for todo schedul yestersday section
+
+
+            <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border border-white rounded">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="fw-semibold yesterday_todo_task" style="font-size: 15px;">${x.task}</span>
+                    <small class="text-muted" style="font-size: 13px;">| Status: <span class="text-warning">Pending</span></small>
+                </div>
+                    <button class="btn btn-sm btn-success py-0 px-2 complete_btn_todo_yesterdat" data-id="${x.id}">Finish</button>
+            </li>
+
+
+
+            <li class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center border border-white rounded">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="fw-semibold yesterday_todo_task" style="font-size: 15px;">${x.task}</span>
+                    <small class="text-muted" style="font-size: 13px;">| Status: <span class="text-success">Completed</span></small>
+                </div>
+            </li>
+
+
+
+
+this is a stucture for tomorrow todo
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="fw-semibold tomorrow_todo_task">${x.task}</div>
+                <div class="tomorrow_todo_task_btn_div">
+                    <button class="btn btn-sm btn-outline-light me-1 py-0 px-2 tomorrow_todo_task_edit_btn" data-id="${x.id}"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger py-0 px-2 tomorrow_todo_task_delete_btn" data-id="${x.id}"><i class="fas fa-trash"></i></button>
+                </div>
+            </li>
+
+
+this is a stucture for Miscellaneous task
+
+
+            <li class="list-group-item text-white d-flex justify-content-between align-items-center deadline_item">
+                <button class="btn btn-sm btn-outline-danger py-0 px-2 delete_btn_miss" data-id="${x.id}">Delete</button>
+                <div class="text-center flex-grow-1 text-break text-truncate" style="font-weight: 500; word-wrap: break-word; overflow-wrap: break-word; white-space: normal;" data-id="${x.id}"> ${x.task} </div>
+                <button class="btn btn-sm btn-outline-success py-0 px-2 complete_btn_miss" data-id="${x.id}">Complete</button>
+            </li>
+
+
+
+
+this is Miscellaneous add button's tag
+
+
+            <button id="add_btn_miss" type="button" class="btn btn-outline-warning"><i class="fa-solid fa-plus"></i> Add</button>
+
+
+            <input type="text" class="form-control bg-transparent text-white rounded-4 border-1 white_placeholder miss_input_task" placeholder="Task can not be empty" maxlength="150">
+            <div class="text-center mt-3">
+                <button id="save_btn_miss" type="button" class="btn btn-outline-success">Save</button>
+            </div>

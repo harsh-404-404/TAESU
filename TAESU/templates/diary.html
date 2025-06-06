@@ -1,0 +1,164 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+    Dashboard
+{% endblock %}
+
+
+{% block main %}
+    <main id="main_diary">
+        <link href="/static/button.css" rel="stylesheet">
+<script>
+{% if error %}
+    alertify.error({{ error | tojson  }});               /* plain {{error}} does not work */
+{% endif %}
+{% if success %}
+    alertify.success({{ success | tojson  }});               /* plain {{error}} does not work */
+{% endif %}
+</script>
+
+
+        <div class="container text_container">
+            <form action="/diary" method="POST" onsubmit="tinymce.triggerSave()">
+                <div class="text-center">
+                    <h3>Date</h3>
+                </div>
+                <div class="d-flex align-items-center justify-content-center p-2">
+                    <input id="date" name="date" type="date" class="form-control w-auto datelimit" autocomplete="off" required onkeydown="return false">
+                </div>
+                    <div>
+                        <p id="today" class="fw-bold fs-2"></p>
+                    </div>
+                <textarea id="editor" name="editor" class="qwert"></textarea>
+                <br>
+                <div class="text-center">
+                <!-- button with animation Start -->
+                    <button class="continue-application" name="form_1">
+                        <div>
+                            <div class="pencil"></div>
+                            <div class="folder">
+                                <div class="top">
+                                    <svg viewBox="0 0 24 27">
+                                        <path d="M1,0 L23,0 C23.5522847,-1.01453063e-16 24,0.44771525 24,1 L24,8.17157288 C24,8.70200585 23.7892863,9.21071368 23.4142136,9.58578644 L20.5857864,12.4142136 C20.2107137,12.7892863 20,13.2979941 20,13.8284271 L20,26 C20,26.5522847 19.5522847,27 19,27 L1,27 C0.44771525,27 6.76353751e-17,26.5522847 0,26 L0,1 C-6.76353751e-17,0.44771525 0.44771525,1.01453063e-16 1,0 Z"></path>
+                                    </svg>
+                                </div>
+                                <div class="paper"></div>
+                            </div>
+                        </div>
+                        Save
+                    </button>
+                <!-- button with animation end-->
+                </div>
+                <input type="hidden" class="c_date" name="c_date">
+            </form>
+        </div>
+
+
+
+
+
+
+
+<div class="container add_deadline">
+  <div class="card text-bg-dark shadow rounded-4 p-4">
+    <h3 class="login_text text-center mb-4" id="task1" data-info="Easily download your diary as a PDF, just the way it looks on screen, for any dates you choose.">DOWNNLOAD AS PDF</h3>
+    <form action="/diary/download" method="POST">
+      <div class="d-flex justify-content-between">
+        <div class="w-50 d-flex justify-content-center inputheading p-0">
+         • Start Date •
+        </div>
+        <div class="w-50 d-flex justify-content-center inputheading p-0">
+         • End Date •
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between" {% if error=="error 204" %} style="--bs-border-color: #f50404;"{% endif %}>
+        <div class="w-50 d-flex justify-content-center">
+          <input  name="start_date" type="date" class="form-control w-75 datelimit" autocomplete="off" required  {% if error=="error 201" or error =="error 204" %} style="--bs-border-color: #f50404;" value="{{request.form.get('start_date')}}"{% endif %}>
+        </div>
+        <div class="w-50 d-flex justify-content-center">
+          <input name="end_date" type="date" class="form-control w-75 datelimit" autocomplete="off" required {% if error=="error 202" or error =="error 204" %} style="--bs-border-color: #f50404;" value="{{request.form.get('end_date')}}"{% endif %}>
+        </div>
+      </div>
+
+      <div class="text-center text-danger">
+      </div>
+      <div class="text-center text-danger p-3">
+          {% if error == "error 201" or error == "error 202" %}
+            <h4>!! Please fill out all required fields !!</h4>
+          {% endif %}
+          {% if error == "error 204" %}
+            <h4>!! Please enter valid dates !!</h4>
+          {% endif %}
+      </div>
+                                    <input type="hidden" class="c_date" name="c_date">         <!-- send current time form user's time zone when submit button is clicked-->
+      <div class="text-center mb-4">
+        <button class="download_button" type="submit" name="form_2" alt="Download">
+            <i>D</i>
+            <i>o</i>
+            <i>w</i>
+            <i>n</i>
+            <i>l</i>
+            <i>o</i>
+            <i>a</i>
+            <i>d</i>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+        <script>
+            window.addEventListener("load", () => {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const date = `${year}-${month}-${day}`;
+
+                let input = document.getElementById("date");
+                            /*send current date via hidden input*/
+                document.querySelectorAll(".c_date").forEach(element => element.value = date);
+
+
+                document.querySelectorAll(".datelimit").forEach(el => el.max = date);
+
+
+
+                input.value = date;
+                async function getdata() {
+                    let response = await fetch(`${window.origin}/diary/date`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            "date": input.value,
+                            "c_date": date
+                        })
+                    });
+
+                    let text = await response.text();
+                    tinymce.get("editor").setContent(text);                   /* its like innerHTML of text-area but we are using tinymce texteditor */
+
+                    if(input.value == date){
+                        document.getElementById("today").innerHTML = "Today"
+                    }
+                    else{
+                        document.getElementById("today").innerHTML = ""
+                    }
+                }
+                getdata();
+
+                input.addEventListener('change', getdata);
+
+
+
+
+            });
+        </script>
+    </main>
+
+{% endblock %}

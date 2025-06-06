@@ -1,0 +1,208 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+    Add
+{% endblock %}
+
+
+{% block main %}
+<main id="main_add">
+
+  <!--popup for success or error-->
+  <script>
+  {% if error %}
+    alertify.error("Form did not submit");
+  {% endif %}
+  {% if success %}
+    alertify.success("Form submitted successfully");
+  {% endif %}
+  {% if error and 300 < error < 400 %}                            /* if error in third form than scroll down to element with id b1*/
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("b1").scrollIntoView(true)
+});
+
+  {% endif %}
+</script>
+
+<div class="container add_deadline">
+  <div class="card text-bg-dark fading_border rounded-4 p-4">
+    <h3 class="login_text text-center mb-4" id="task1" data-info="This will add a new deadline countdown to your dashboard">Add Deadline</h3>
+    <form action="/add" method="POST">
+                    <input type="hidden" class="c_time" name="c_time">         <!-- send current time form user's time zone when submit button is clicked-->
+      <div class="mb-3">
+        <div class="inputheading">
+           • Add Task:
+        </div>
+        <input name="deadline_title" type="text" class="form-control" autocomplete="off" placeholder="Enter heading" required {% if error==101 %} style="--bs-border-color: #f50404;"{% endif %} {% if error and 100 < error < 200 %} value="{{ request.form.get('deadline_title') }}" {% endif %}>
+      </div>
+      <div class="mb-3">
+        <div class="inputheading">
+           • Deadline Date :
+        </div>
+        <input name="deadline_date" type="datetime-local" class="form-control datetimelimit" autocomplete="off" required {% if error==102 or error==103 or error == 104 %} style="--bs-border-color: #f50404;"{% endif %}>
+      </div>
+      <div class="text-center text-danger">
+        {% if error and error > 100 and error < 200 %}
+          {% if error == 101 or error == 102 %}
+            <h4>!! Please fill out all requiredd fields !!</h4>
+          {% endif %}
+          {% if error == 103 %}
+            <h4>!! The deadline should be at least 12 hours away!!</h4>
+          {% endif %}
+          {% if error == 104 %}
+            <h4>!! Deadline title is alredy in use !!</h4>
+          {% endif %}
+        {% endif %}
+      </div>
+      <div class="text-center">
+      <button class="b1" type="submit" name="form1">Add</button>
+      </div>
+    </form>
+  </div>
+                                                <!-- Recent entrys -->
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="container add_deadline">
+  <div class="card text-bg-dark fading_border rounded-4 p-4">
+    <h3 class="login_text text-center mb-4" id="task1" data-info="This task will be added to your to-do list daily from the Start Date to the End Date">Create Todo Task Series</h3>
+    <form action="/add" method="POST">
+
+      <div class="d-flex justify-content-between">
+        <div class="w-50 d-flex justify-content-center inputheading p-0">
+         • Start Date •
+        </div>
+        <div class="w-50 d-flex justify-content-center inputheading p-0">
+         • End Date •
+        </div>
+      </div>
+
+
+      <div class="d-flex justify-content-between" {% if error==204 or error == 205 %} style="--bs-border-color: #f50404;"{% endif %}>
+        <div class="w-50 d-flex justify-content-center">
+          <input  name="start_date" type="date" class="form-control w-75 datelimit" autocomplete="off" required  {% if error==201 %} style="--bs-border-color: #f50404;"{% endif %}>
+        </div>
+        <div class="w-50 d-flex justify-content-center">
+          <input name="end_date" type="date" class="form-control w-75 datelimit" autocomplete="off" required {% if error==202 %} style="--bs-border-color: #f50404;"{% endif %}>
+        </div>
+      </div>
+      <div class="m-4">
+        <div id="task1" data-info="This task will be added to your to-do list daily from the Start Date to the End Date"class="inputheading" >
+           • Task:
+        </div>
+        <input name="task" type="text" class="form-control" autocomplete="off" maxlength="200" placeholder="e.g. Morning workout, Check emails " required  {% if error==203 or error==205 %} style="--bs-border-color: #f50404;"{% endif %} {% if error and 200 < error < 300 %} value="{{ request.form.get('task', '') }}" {% endif %}>
+      </div>
+      <div class="text-center text-danger">
+        {% if error and error > 200 and error < 300 %}
+          {% if error == 201 or error == 202 or error == 203 %}
+            <h4>!! Please fill out all required fields !!</h4>
+          {% endif %}
+          {% if error == 204 %}
+            <h4>!! Please enter valid dates !!</h4>
+          {% endif %}
+          {% if error == 205 %}
+            <h5>!! This task has already been scheduled to be added to the to-do list between !!</h5>
+            {% for x in list %}
+             <p>{{ x.start }} to {{ x.end }}</p>
+            {% endfor %}
+          {% endif %}
+        {% endif %}
+      </div>
+                      <input type="hidden" class="c_time" name="c_time">         <!-- send current time form user's time zone when submit button is clicked-->
+      <div class="text-center mt-4">
+        <button class="b1" type="submit" name="form2">Add</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="container add_deadline">
+  <div class="card text-bg-dark fading_border rounded-4 p-4">
+    <h3 class="login_text text-center mb-4" id="task1" data-info="The note will be displayed in the dashboard's reminder section">Remind me</h3>
+    <form action="/add" method="POST">
+
+      <div class="m-4">
+        <div id="task1" data-info="This task will be added to your to-do list daily from the Start Date to the End Date"class="inputheading">
+           • Note:
+        </div>
+        <input name="note" type="text" class="form-control" autocomplete="off" placeholder="e.g. Call the dentist, Pay electricity bill" required  {% if error==301 %} style="--bs-border-color: #f50404;"{% endif %} {% if error and 300 < error < 400  %} value="{{ request.form.get('note', '') }}" {% endif %}>
+      </div>
+      <div class="d-flex align-items-center justify-content-center inputheading p-2">
+        Date:
+        <input id="date" name="remind_date" type="date" class="form-control w-25 datelimit" autocomplete="off" required  {% if error==302  or error==304 %} style="--bs-border-color: #f50404;"{% endif %} {% if error and 300 < error < 400  %} value="{{ request.form.get('remind_date', '') }}" {% endif %}>
+      </div>
+      <div class="text-center text-danger">
+        {% if error and error > 300 and error < 400 %}
+          {% if error == 301 or error == 302 %}
+            <h4>!! Please fill out all required fields !!</h4>
+          {% endif %}
+          {% if error == 303 %}
+            <h4>!! A reminder with the same note and date already exists. Please update the existing reminder or choose a different note/date.  !!</h4>
+          {% endif %}
+          {% if error == 304%}
+            <h4>!! Please enter vaild date  !!</h4>
+          {% endif %}
+        {% endif %}
+      </div>
+                                    <input type="hidden" class="c_time" name="c_time">         <!-- send current time form user's time zone when submit button is clicked-->
+      <div class="text-center mt-4">
+        <button id="b1"class="b1" type="submit" name="form3">Add</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="/static/add.js"></script>
+</main>
+{% endblock %}

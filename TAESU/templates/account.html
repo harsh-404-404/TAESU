@@ -1,0 +1,289 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Account
+{% endblock %}
+
+
+
+
+{% block main %}
+  <script>
+  {% if error %}
+    alertify.error("somthing went wrong");
+  {% endif %}
+  {% if success==True %}
+    alertify.success("success");
+  {% endif %}
+</script>
+    <main id="main_add">
+
+        <div class="container w-auto">
+            <div class="shadow rounded-4 p-4">
+                <h3 class="login_text text-center mb-4" id="task1" data-info="View and manage your account information">Account Settings</h3>
+
+            <!-- Profile Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="150px" height="150px" fill="#f9be0c" class="bi bi-person-circle container" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                </svg>
+
+            <!-- Greeting -->
+                <h2 class="text-center p-2">{{username}}</h2>
+                <div class="mb-4">
+                    <h3 class="text-white">Welcome, <strong> {{name}}</strong></h3>
+                    <p class="text-muted">Email: {{email}}</p>
+                </div>
+
+                <form id="usernameForm" action="/account" method="POST" class="mb-4" onsubmit="return cheak_password(event)"> <!--(event) to use event.prventDefault()-->
+                    <input type ="hidden" name="form_name" value="form_1">  <!-- When form is submmited via script with .submit() method it also looses the name of submit button and this is big issue when there are multiple forms in one page that's why hidden input -->
+                    <div class="mb-3">
+                        <div class="inputheading">• Update Username:</div>
+                        <input name="username" type="text" class="form-control" value="{{username}}" {% if error==1001 %} style="--bs-border-color: #f50404;" {% endif %} required >
+                        {% if error==1001 %}
+                            <div class="text-center text-danger p-2">
+                                <h4>username already taken</h4>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                <!-- Button triggers modal -->
+                    <div class="text-center">
+                        <button type="button" class="btn btn-warning rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#passwordModal">
+                            Update Username
+                        </button>
+                    </div>
+
+                    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered "> <!-- Larger & centered -->
+                            <div class="modal-content custom-modal"> <!-- Add class for custom CSS -->
+
+                                <div class="modal-header border-0"> <!-- Remove line -->
+                                    <h5 class="modal-title" id="passwordModalLabel">Confirm Password</h5>
+                                    <button type="button" name="username" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <div class="modal-body border-0"> <!-- Remove line -->
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Enter your current password:</label>
+                                        <input type="password" name="password" id="username_password" class="form-control" required>
+                                        <div class="text-end">
+                                            <a href="/forgotpassword">Forgot password?</a>
+                                        </div>
+                                        <div class="text-center text-danger p-2">
+                                            <h4 id="error_msg_1"></h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer border-0 justify-content-center"> <!-- Center button -->
+                                    <button id="b1" type="submit" class="btn btn-warning rounded-pill px-4">Confirm & Update</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+            <!-- Email Update Form -->
+                <form id="emailForm" action="/account" method="POST" class="mb-4" onsubmit="return cheak_password(event)"> <!--(event) to use event.prventDefault()-->
+                    <input type ="hidden" name="form_name" value="form_2">    <!-- When form is submmited via script with .submit() method it also looses the name of submit button and this is big issue when there are multiple forms in one page that's why hidden input -->
+                    <div class="mb-3">
+                        <div class="inputheading">• Update Email:</div>
+                        <input name="email" type="email" class="form-control" value="{{email}}" {% if error==1002 %} style="--bs-border-color: #f50404;" {% endif %} required >
+                        {% if error==1002 %}
+                            <div class="text-center text-danger p-2">
+                                <h4>Email address aready in use</h4>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                <!-- Button triggers modal -->
+                    <div class="text-center">
+                        <button type="button" class="btn btn-warning rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#emailModal">
+                            Update Email
+                        </button>
+                    </div>
+
+                <!-- Modal for password confirmation -->
+                    <div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content custom-modal">
+
+                                <div class="modal-header border-0">
+                                    <h5 class="modal-title" id="emailModalLabel">Confirm Password</h5>
+                                    <button type="button" name="email" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <div class="modal-body border-0">
+                                    <div class="mb-3">
+                                        <label for="email-password" class="form-label">Enter your current password:</label>
+                                        <input type="password" name="password" id="email_password" class="form-control" required>
+
+                                        <div class="text-end p-2">
+                                            <a href="/forgotpassword">Forgot password?</a>
+                                        </div>
+                                        <div class="text-center text-danger p-2">
+                                            <h4 id="error_msg_2"></h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer border-0 justify-content-center">
+                                    <button type="submit" class="btn btn-warning rounded-pill px-4">Confirm & Update</button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+
+
+            <!-- Change Password Button -->
+                <div class="text-center mb-4">
+                    <button type="button" class="btn btn-outline-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        Change Password
+                    </button>
+                </div>
+
+            <!-- Modal for confirming before redirecting -->
+                <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content custom-modal">
+
+                            <div class="modal-header border-0">
+                                <h5 class="modal-title" id="changePasswordModalLabel">Confirm Password</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body border-0">
+                                <div class="mb-3">
+                                    <label for="confirm-password" class="form-label">Enter your current password:</label>
+                                    <input type="password" id="confirm_password" name="email_password" class="form-control" required>
+                                    <div class="text-end p-2">
+                                        <a href="/forgotpassword">Forgot password?</a>
+                                    </div>
+                                    <div class="text-center text-danger p-2">
+                                        <h4 id="error_msg_3"></h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer border-0 justify-content-center">
+                                <button type="button" id="change_password_button"class="btn btn-warning rounded-pill px-4">Proceed to Change Password</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            <hr class="my-4 text-light">
+
+            <!-- Download Data -->
+            <h4 class="text-center p-2">download your whole diaty as a pdf</h4>
+            <form action="/account" method="POST" class="text-center mb-4">
+                <button class="btn btn-success rounded-pill px-4" type="submit" name="form_3"><i class="bi bi-download"></i> My Diary<strong> (.pdf)</strong> </button>
+            </form>
+
+            <hr class="my-4 text-light">
+
+
+            <h4 class="text-center p-2">download your deadline task history as excel file</h4>
+            <form action="/account" method="POST" class="text-center mb-4">
+                <button class="btn btn-success rounded-pill px-4" type="submit" name="form_4"><i class="bi bi-download"></i> My Deadline History<strong> (.xlsx)</strong></button>
+            </form>
+
+            <hr class="my-4 text-light">
+
+            <h4 class="text-center p-2">download your remider history as excel file</h4>
+            <form action="/account" method="POST" class="text-center mb-4">
+                <button class="btn btn-success rounded-pill px-4" type="submit" name="form_5"><i class="bi bi-download"></i> My Reminder History<strong> (.xlsx)</strong></button>
+            </form>
+
+            <hr class="my-4 text-light">
+            <div class="text-center mt-3 miss_add_btn_div">
+                           <h4 class="text-center p-2">download your miscellaneous task history</h4>
+                <form action="/download_miss_history" method="POST">
+                    <button type="submit" class="btn btn-btn btn-success"><i class="bi bi-download"></i> Download history (.xlsx)</button>
+                </form>
+            </div>
+
+            <hr class="my-4 text-light">
+            <!-- Logout -->
+            <div class="text-center">
+                <form action="/login" method="GET">
+                    <button class="btn btn-outline-light rounded-pill px-4" type="submit">Log Out</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+                <script>
+
+            async function cheak_password(event) {
+                event.preventDefault(); /* to prevente it from submittion */
+
+                const form = event.target; /* to know which from was user to submit (each submit button has name="form1".....)*/
+
+                const formdata = new FormData(form);
+                const password = formdata.get("password");
+
+                const response = await fetch(`${window.origin}/cheak_password`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        password: password
+                    })
+                });
+
+                const text = await response.text();
+
+                if (text === "ok") {
+
+                    form.submit(); // Manually submit after validation passes
+                } else {
+
+                    const submitterName = formdata.get("form_name")
+                    if (submitterName === "form_1") {
+                        document.getElementById("error_msg_1").innerHTML = "!! Wrong password !!";
+                        document.getElementById("username_password").style.border = "2px solid red";
+                    } else {
+                        document.getElementById("error_msg_2").innerHTML = "!! Wrong password !!";
+                        document.getElementById("email_password").style.border = "2px solid red";
+                    }
+                }
+
+                return false; // Prevent default submit for now
+            }
+
+            document.getElementById("change_password_button").addEventListener("click", hyperlink);
+
+            async function hyperlink() {
+                password = document.getElementById("confirm_password").value
+
+                const response = await fetch(`${window.origin}/cheak_password_v2`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        password: password,
+                        changepassword: "yes"
+                    })
+                });
+                const text = await response.text(); /* i should be directed to change password page and if i get responce that means password is wrong or somthing went wrong */
+                if (text === "redirect") {
+                    window.location.href = "/changepassword";
+                } else {
+                    document.getElementById("error_msg_3").innerHTML = "!! Wrong password !!";
+                    document.getElementById("confirm_password").style.border = "2px solid red";;
+                }
+            }
+        </script>
+    </main>
+{% endblock %}

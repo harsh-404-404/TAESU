@@ -1,0 +1,1090 @@
+{% extends "layout.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{%block head%}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">{%endblock%}
+
+{% block main %}
+<script>
+  {% if error %}
+    {% if error == 101 %}
+      alertify.error("Task not found");
+    {% elif error == 102 %}
+      alertify.error("Missing internal element");
+    {% elif error == 103 %}
+      alertify.error("Task is too long (max 200 characters)");
+    {% elif error == 104 %}
+      alertify.error("Task already exists for this date");
+    {% else %}
+      alertify.error("Unknown error occurred");
+    {% endif %}
+  {% endif %}
+
+  {% if success %}
+    alertify.success("{{ success }}");
+  {% endif %}
+  </script>
+    <main id="main_dashboard">
+        <div class="d-flex justify-content-between align-items-start gap-3">
+        <!-- Left: To-Do List -->
+            <div class="w-60 p-4">
+                <div class="card text-bg-dark rounded-10 fading_border">
+                    <div class="card-body">
+                        <h3 class="text-center mb-4" style="font-family: 'Segoe UI', sans-serif;">
+                            To Do List
+                        </h3>
+
+                    <!-- Task Input Form -->
+                        <form action="/dashboard" method="POST" class="row g-2 align-items-center  mb-4">
+                            <div class="col-md-10">
+                                <div class="form-outline" data-mdb-input-init>
+                                    <input name="task" type="text" id="taskInput" class="form-control bg-transparent text-white rounded-3 border-warning white_placeholder input_add_todo" placeholder="Enter a task here" maxlength="200">
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-center">
+                                <input type="hidden" name="c_date" id="qwws21s">
+                                <button name="form1" type="submit" class="btn btn_add_todo">
+                                    <i class="fas fa-plus me-2"></i>Add Task
+                                </button>
+                            </div>
+                        </form>
+
+                    <!-- Transparent Tasks Table -->
+                        <div class="table-responsive">
+                            <table class="table todo_table table-borderless text-white align-middle" style="backdrop-filter: blur(6px); background: transparent;">
+                                <thead>
+                                    <tr class="text-uppercase fw-semibold text-muted text-center" style="font-size: 14px; font-family: 'Segoe UI', sans-serif;">
+                                        <th scope="col" style="width: 55%;">Task</th>
+                                        <th scope="col" style="width: 20%;">Status</th>
+                                        <th scope="col" style="width: 25%;" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="font-family: 'Segoe UI', sans-serif; font-size: 16px;" id="tbody_todo">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+                        <!--schedual todo list  -->
+                <div class="card text-bg-dark rounded-10 fading_border mt-4">
+                    <div class="card-body">
+                        <h4 class="text-center mb-4" style="font-family: 'Segoe UI', sans-serif;">
+                            Schedule of To-do List
+                        </h4>
+
+                        <div class="d-flex flex-row gap-4 flex-wrap">
+                            <!-- Yesterday Section -->
+                            <div class="schedule-card flex-fill" style="min-width: 300px; max-width: 50%;">
+                                <h5 class="text-warning mb-3" style="font-family: 'Segoe UI', sans-serif;">Yesterday</h5>
+                                <ul class="list-group list-group-flush task-list" id="yesterday_todo_tasks">
+                                    <!-- Tasks go here -->
+                                </ul>
+                            </div>
+
+                            <!-- Tomorrow Section -->
+                            <div class="schedule-card flex-fill" style="min-width: 300px; max-width: 50%;">
+                                <h5 class="cutom_text_v1t24dzfwe mb-3" style="font-family: 'Segoe UI', sans-serif;">Tomorrow</h5>
+                                <ul class="list-group list-group-flush task-list" id="tomorrow_todo_tasks">
+                                    <!-- Tasks go here -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+
+
+        <!-- Right: Reminders and Deadline Area -->
+            <div class="w-40 d-flex flex-column gap-4 p-4 ps-0">
+            <!-- Row: Today's and Tomorrow's Reminders side by side -->
+                <div class="d-flex gap-3">
+                <!-- Today's Reminder -->
+                    <div class="w-50">
+                        <div class="card text-bg-dark fading_border">
+                            <div class="card-body">
+                                <h4 class="text-center mb-3" style="font-family: 'Segoe UI', sans-serif;">
+                                    Today's Important Reminders
+                                </h4>
+                                <ul id="reminder_for_today_ul" class="list-unstyled" style="font-family: 'Segoe UI', sans-serif; font-size: 15px;"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Tomorrow's Reminder -->
+                    <div class="w-50">
+                        <div class="card text-bg-dark fading_border">
+                            <div class="card-body">
+                                <h4 class="text-center mb-3" style="font-family: 'Segoe UI', sans-serif;">
+                                    Tomorrow's Reminders
+                                </h4>
+                                <ul id="reminder_for_tomorrow_ul" class="list-unstyled" style="font-family: 'Segoe UI', sans-serif; font-size: 15px;"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Deadline Card -->
+                <div class="card text-bg-dark fading_border" id="deadline_card">
+                    <div class="card-body position-relative">
+                    <!-- Close button on hover -->
+                        <button type="button" class="btn-close position-absolute top-0 start-0 m-2 d-none" aria-label="Close" id="deadline_close_btn"></button>
+
+                        <h4 class="text-center mb-3" style="font-family: 'Segoe UI', sans-serif;">
+                            Upcoming Deadlines
+                        </h4>
+
+                    <!-- Deadline list -->
+                        <ul class="list-group list-group-flush " id="deadline_ul" style="font-family: 'Segoe UI', sans-serif; font-size: 15px;">
+                        <!-- Sample item -->
+
+
+                        </ul>
+                        <div class="text-center">
+                            <a href="/add" class="btn btn_add_plus">
+                                <i class="fas fa-plus me-1"></i>Add
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+<div class="card text-bg-dark fading_border" id="misc_tasks_card">
+    <div class="card-body position-relative">
+
+        <h4 class="text-center mb-3" style="font-family: 'Segoe UI', sans-serif;">
+            Miscellaneous Tasks
+        </h4>
+
+        <!-- Task list -->
+        <ul class="list-group list-group-flush" id="miss_task_ul" style="font-family: 'Segoe UI', sans-serif; font-size: 15px;">
+            <!-- Sample item -->
+
+        </ul>
+
+        <div class="text-center mt-3 miss_add_btn_div">
+            <button id="add_btn_miss" type="button" class="btn btn-outline-warning"><i class="fa-solid fa-plus"></i> Add</button>
+        </div>
+
+    </div>
+</div>
+
+
+            </div>
+        </div>
+
+
+
+    </main>
+
+
+
+
+
+
+
+
+
+    <script>
+    /* send current date and get todo list */
+
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const date = `${year}-${month}-${day}`;
+        const time = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+
+        document.getElementById("qwws21s").value = date;
+
+    /*send current date via hidden input*/
+        async function setup_todo() {
+            try {
+                let response = await fetch(`${window.origin}/give_todo_list`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "c_date": date
+                    })
+                });
+                let list = await response.json();
+                list.forEach(x => {
+                /* just like python (for x in list:) */
+                    const row = document.createElement("tr"); /* creat a new tr tag */
+                    if (x.status === 0) {
+                        row.innerHTML = ` <td> <div class="d-flex align-items-center justify-content-between task_div_todo"> <span class="task_todo_span">${x.task}</span> <button class="action-btn btn-edit ms-2 edit_btn_todo" data-id="${x.id}"> <i class="fa-solid fa-edit"></i> </button> </div> </td> <td class="text-center"> <span class="status-badge badge-in-progress">Pending</span> </td> <td> <div class="d-flex gap-2 flex-wrap justify-content-center"> <button class="action-btn btn-finish complete_btn_todo" data-id="${x.id}"> <i class="fa-solid fa-check-circle"></i> Finish </button> <button class="action-btn btn-delete delete_btn_todo" data-id="${x.id}"> <i class="fa-solid fa-trash-alt"></i> </button> </div> </td> `;
+                    } else {
+                        row.innerHTML = ` <tr> <td> <div class="d-flex align-items-center justify-content-between"> <span class="task_todo_span"><s>${x.task}</s></span> </div> </td> <td class="text-center"><span class="status-badge badge-completed">Completed</span></td> <td> <div class="d-flex gap-2 flex-wrap justify-content-center"><button class="action-btn btn-delete delete_btn_todo bg-transparent" data-id="${x.id}"> <i class="fa-solid fa-trash-alt opacity-25""></i> </button> </div> </td> </tr> `;
+                    }
+
+                    document.getElementById("tbody_todo").appendChild(row);
+
+                });
+            } catch (error) {
+                console.error("Error in setup_todo:", error);
+                alertify.error("Failed to load to-do list. Please try again.");
+            }
+        }
+        setup_todo();
+
+
+    //delete button
+    // delete button design in a way that all delete buttons workd even those which appeared after funtion was loaded
+        document.getElementById("tbody_todo").addEventListener("click", async function(e) { // this way when ever somting is clicked in tbody_todo fuction will run an
+            const button = e.target.closest(".delete_btn_todo"); // pick closest delete_btn_todo
+            if (!button) return; // ignore clicks on non-delete buttons
+        // handle click on delete button
+            const taskid = button.dataset.id;
+
+            try {
+                const response = await fetch(`${window.origin}/delete_todo_task`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid
+                    })
+                });
+
+                const xyz = await response.text();
+
+                if (xyz === "ok") {
+                    button.closest("tr").remove();
+                    alertify.success("Task removed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+                console.error("Delete failed:", error);
+                alertify.error("Error connecting to server");
+            }
+        });
+
+    // complete task button
+        document.getElementById("tbody_todo").addEventListener("click", async function(tbody) {
+            const button = tbody.target.closest(".complete_btn_todo");
+            if (!button) return; // ignore clicks on non-delete buttons
+
+
+
+            const taskid = button.dataset.id;
+
+            try {
+
+                const response = await fetch(`${window.origin}/complete_todo_task`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid
+                    })
+                });
+
+                const answer = await response.text();
+
+                if (answer === "ok") {
+                    const task = button.closest("tr").querySelector(".task_todo_span").innerHTML; // so .colsest() only look upward rowards parents or it self it does not go down
+                    button.closest("tr").innerHTML = ` <tr> <td> <div class="d-flex align-items-center justify-content-between"> <span class="task_todo_span"><s>${task}</s></span> </div> </td> <td class="text-center"><span class="status-badge badge-completed">Completed</span></td> <td> <div class="d-flex gap-2 flex-wrap justify-content-center"><button class="action-btn btn-delete delete_btn_todo bg-transparent" data-id="${taskid}"> <i class="fa-solid fa-trash-alt opacity-25""></i> </button>  </div> </td> </tr> `;
+                    alertify.success("Task completed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+
+                alertify.error("Error connecting to server");
+            }
+        });
+
+    // edit button todo
+        document.getElementById("tbody_todo").addEventListener("click", function(tbody) {
+            const button = tbody.target.closest(".edit_btn_todo");
+            if (!button) return; // ignore clicks on non-delete buttons
+
+
+
+            const taskid = button.dataset.id;
+            const o_task = button.closest("tr").querySelector(".task_todo_span").innerText; //const task = button.closest(".task_todo_span").innerText is worng because closest only searches upward through the element’s ancestors. and .task_todo_spam is a sibling a]
+            const div = button.closest("div"); // form stucture we can see that button is a child of div
+            div.innerHTML = `<input type="text" class="form-control bg-transparent text-white rounded-4 border-0 white_placeholder input_task_todo" value="${o_task}" placeholder ="Task can not be empty"maxlength="200"><button class="btn btn-warning px-2 py-1 m-2 rounded-pill save_btn_todo"> save  </button>`; // o_task === original_task
+            div.querySelector(".save_btn_todo").addEventListener("click", async function() {
+                input = div.querySelector(".input_task_todo");
+                n_task = input.value;
+                if (n_task === "") {
+                    alertify.error("task can not be empty")
+                } else {
+                    try {
+
+                        const response = await fetch(`${window.origin}/edit_todo_task`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                id: taskid,
+                                task: n_task
+                            })
+                        });
+
+                        const answer = await response.text();
+
+                        if (answer === "ok") {
+                            div.innerHTML = ` <span class="task_todo_span">${n_task}</span> <button class="action-btn btn-edit ms-2 edit_btn_todo" data-id="${taskid}"> <i class="fa-solid fa-edit"></i> </button> `;
+                            alertify.success("Task updated");
+                        } else {
+                            alertify.error("Something went wrong");
+                        }
+
+                    } catch (error) {
+
+                        alertify.error("Error connecting to server");
+                    }
+                }
+            })
+
+
+
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        async function setup_reminder() {
+            try {
+                let response = await fetch(`${window.origin}/give_reminder_list`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "c_date": date
+                    })
+                });
+                let list = await response.json();
+                list.forEach(x => {                       /* just like python (for x in list:) */
+
+                    const li = document.createElement("li"); /* creat a new tr tag */
+                    li.classList.add('d-flex', 'align-items-center', 'justify-content-between', 'mb-2',);
+                    if (x.status === 0) {
+                        li.innerHTML = ` <div class="form-check div_containg_note"> <input class="form-check-input cheakbox_reminder" type="checkbox" id="reminder1" data-id="${x.id}"> <label class="form-check-label note_reminder" for="reminder1">${x.note}</label> </div> <div class="div_containg_btn"> <i class="fas fa-edit text-warning me-2 edit_btn_reminder" role="button" data-id="${x.id}"></i> <i class="fas fa-trash text-danger delete_btn_reminder" role="button" data-id="${x.id}"></i> </div> `;
+                    } else {
+                        li.innerHTML = ` <div class="form-check div_containg_note"> <input class="form-check-input me-2 cheakbox_reminder" type="checkbox" id="reminder2" checked data-id="${x.id}"> <label class="form-check-label note_reminder" for="reminder2"><s>${x.note}</s></label> </div> <div class="div_containg_btn"> <i class="fas fa-edit text-secondary me-2 edit_btn_reminder" role="button" data-id="${x.id}"></i> <i class="fas fa-trash text-secondary delete_btn_reminder" role="button" data-id="${x.id}"></i> </div>  `;
+                    }
+
+                    document.getElementById("reminder_for_today_ul").appendChild(li);
+
+                });
+            } catch (error) {
+                console.error("Error in setup_reminder:", error);
+                alertify.error("Failed to load today's reminder list. Please try again.");
+            }
+        }
+        setup_reminder();
+
+            // complete task reminder
+        document.getElementById("reminder_for_today_ul").addEventListener("click", async function(ul) {
+            const button = ul.target.closest(".cheakbox_reminder");
+            if (!button) return; // ignore clicks on non-cheakbox buttons
+
+
+
+            const taskid = button.dataset.id;
+            const note = button.closest("li").querySelector(".note_reminder").innerText;                        // not innerHTML because there is <s></s> tag are there in case check box is checked
+            try {
+                status = button.checked ? 1 : 0;    // if button is checked than value 1 else 0
+                const response = await fetch(`${window.origin}/update_reminder_status`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid,
+                        status: status
+                    })
+                });
+
+                const answer = await response.text();
+
+                if (answer === "ok") {
+
+                    if (status == 0){
+                        button.closest("li").innerHTML = ` <div class="form-check div_containg_note"> <input class="form-check-input me-2 cheakbox_reminder" type="checkbox" id="reminder1" data-id="${taskid}"> <label class="form-check-label note_reminder" for="reminder1">${note}</label> </div> <div class="div_containg_btn"> <i class="fas fa-edit text-warning me-2 edit_btn_reminder" role="button" data-id="${taskid}"></i> <i class="fas fa-trash text-danger delete_btn_reminder" role="button" data-id="${taskid}"></i> </div>  `;
+                    }
+                    else{
+                        button.closest("li").innerHTML = ` <div class="form-check div_containg_note"> <input class="form-check-input me-2 cheakbox_reminder" type="checkbox" id="reminder2" checked data-id="${taskid}"> <label class="form-check-label note_reminder" for="reminder2"><s>${note}</s></label> </div> <div class="div_containg_btn"> <i class="fas fa-edit text-secondary me-2 edit_btn_reminder" role="button" data-id="${taskid}"></i> <i class="fas fa-trash text-secondary delete_btn_reminder" role="button" data-id="${taskid}"></i> </div> `;
+                    }
+                     // so .colsest() only look upward rowards parents or it self it does not go down
+                    alertify.success("Task completed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+
+                alertify.error("Error connecting to server");
+            }
+        });
+
+
+
+        // edit button reminder
+        document.getElementById("reminder_for_today_ul").addEventListener("click", function(ul) {
+            const button = ul.target.closest(".edit_btn_reminder");
+            if (!button) return; // ignore clicks on non-delete buttons
+
+
+            const li = button.closest("li")
+            const taskid = button.dataset.id;
+            const o_note = li.querySelector(".note_reminder").innerText;
+            const div_textarea = li.querySelector(".div_containg_note");
+            const div_save = li.querySelector(".div_containg_btn");
+            const status = li.querySelector(".cheakbox_reminder").checked ? 1 : 0;
+
+
+            div_textarea.innerHTML = `<input type="text" class="form-control bg-transparent text-white rounded-4 border-1 white_placeholder input_note_reminder" value="${o_note}" placeholder ="Task can not be empty"maxlength="200">`;
+            div_save.innerHTML = `<button class="btn btn-warning m-2 rounded-pill save_btn_reminder"> save  </button>`;
+
+
+            li.querySelector(".save_btn_reminder").addEventListener("click", async function() {
+                n_note = li.querySelector(".input_note_reminder").value
+                if (n_note === ""){
+                    alertify.error("task can not be empty");
+                }else {
+                    try{
+
+                        const response = await fetch(`${window.origin}/edit_reminder_note`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                id: taskid,
+                                note: n_note
+                            })
+                        });
+
+                        const answer = await response.text();
+
+                        if (answer === "ok") {
+                            if (status === 0){
+                                div_textarea.innerHTML = ` <input class="form-check-input me-2 cheakbox_reminder" type="checkbox" id="reminder1" data-id="${taskid}"> <label class="form-check-label note_reminder" for="reminder1">${n_note}</label> `;
+                                div_save.innerHTML = `  <i class="fas fa-edit text-warning me-2 edit_btn_reminder" role="button" data-id="${taskid}"></i> <i class="fas fa-trash text-danger delete_btn_reminder" role="button" data-id="${taskid}"></i>  `;
+                            }
+                            else{
+                                div_textarea.innerHTML = ` <input class="form-check-input me-2 cheakbox_reminder" type="checkbox" id="reminder2" checked data-id="${taskid}"> <label class="form-check-label note_reminder" for="reminder2"><s>${n_note}</s></label> `;
+                                div_save.innerHTML = ` <i class="fas fa-edit text-secondary me-2 edit_btn_reminder" role="button" data-id="${taskid}"></i> <i class="fas fa-trash text-secondary delete_btn_reminder" role="button" data-id="${taskid}"></i> `;
+                            }
+                            alertify.success("Task completed")
+                        } else {
+                            alertify.error("Something went wrong");
+                        }
+                    } catch (error) {
+
+                        alertify.error("Error connecting to server");
+                    }
+                }
+
+
+            });
+        });
+
+
+
+            //delete button today's reminder
+        document.getElementById("reminder_for_today_ul").addEventListener("click", async function(e) { // this way when ever somting is clicked in tbody_todo fuction will run an
+            const button = e.target.closest(".delete_btn_reminder"); // pick closest delete_btn
+            if (!button) return; // ignore clicks on non-delete buttons
+        // handle click on delete button
+            const taskid = button.dataset.id;
+
+            try {
+                const response = await fetch(`${window.origin}/delete_reminder_note`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid
+                    })
+                });
+
+                const answer = await response.text();
+
+                if (answer === "ok") {
+                    button.closest("li").remove();
+                    alertify.success("Task removed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+                console.error("Delete failed:", error);
+                alertify.error("Error connecting to server");
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+        async function setup_tomorrow_reminder() {
+            try {
+                let response = await fetch(`${window.origin}/give_tomorrow_reminder_list`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "c_date": date
+                    })
+                });
+                let list = await response.json();
+                list.forEach(x => {                       /* just like python (for x in list:) */
+
+                    const li = document.createElement("li"); /* creat a new tr tag */
+                    li.classList.add('d-flex', 'justify-content-between' , 'align-items-center', 'mb-2');
+
+                        li.innerHTML = `<span class="note_reminder">${x.note}</span> <i class="fas fa-trash text-danger delete_btn_reminder" role="button" data-id="${x.id}"></i> `;
+
+                    document.getElementById("reminder_for_tomorrow_ul").appendChild(li);
+
+                });
+            } catch (error) {
+                console.error("Error in setup_reminder:", error);
+                alertify.error("Failed to load today's reminder list. Please try again.");
+            }
+        }
+        setup_tomorrow_reminder();
+
+
+
+
+                    //delete button tomorrow's reminder
+        document.getElementById("reminder_for_tomorrow_ul").addEventListener("click", async function(e) { // this way when ever somting is clicked in tbody_todo fuction will run an
+            const button = e.target.closest(".delete_btn_reminder"); // pick closest delete_btn
+            if (!button) return; // ignore clicks on non-delete buttons
+        // handle click on delete button
+            const taskid = button.dataset.id;
+
+            try {
+                const response = await fetch(`${window.origin}/delete_reminder_tomorrow_note`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid
+                    })
+                });
+
+                const answer = await response.text();
+
+                if (answer === "ok") {
+                    button.closest("li").remove();
+                    alertify.success("Task removed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+                console.error("Delete failed:", error);
+                alertify.error("Error connecting to server");
+            }
+        });
+
+
+
+
+
+
+        // This funtion is for countdown of deadline
+        function deadlinecountdown(targetTimeString, elementId) {
+        // Parse the target time as local time
+        const countDownDate = new Date(targetTimeString).getTime();
+
+        // Set up a timer
+        const timer = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = countDownDate - now;
+
+                // Time parts
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                const output = distance < 0
+                ? "EXPIRED"
+                : `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+                document.getElementById(elementId).innerHTML = output;
+
+                if (distance < 0) {
+                clearInterval(timer);
+                }
+            }, 1000);
+        }
+
+        async function setup_deadline() {
+            try {
+                let response = await fetch(`${window.origin}/give_deadline_list`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "c_time": time
+                    })
+                });
+                let list = await response.json();
+                list.forEach(x => {                       /* just like python (for x in list:) */
+
+                    const li = document.createElement("li"); /* creat a new tr tag */
+                    li.classList.add('list-group-item', 'text-white' , 'd-flex', 'justify-content-between', 'align-items-center', 'deadline_item');
+
+                    li.innerHTML = `<div> <div class="fw-semibold">${x.title}</div> <small class="text-warning" id="time_${x.id}">2d 3h 15m left</small> </div> <button class="btn btn-sm btn-outline-danger py-0 px-2 deadline_delete_btn"data-id="${x.id}">Delete</button>`;
+
+                    document.getElementById("deadline_ul").appendChild(li);
+                    deadlinecountdown(x.date,`time_${x.id}`);
+
+                });
+            } catch (error) {
+                console.error("Error in setup_reminder:", error);
+                alertify.error("Failed to load today's reminder list. Please try again.");
+            }
+        }
+        setup_deadline();
+
+
+
+
+        //delete button for deadline
+        document.getElementById("deadline_ul").addEventListener("click", async function(e) { // this way when ever somting is clicked in tbody_todo fuction will run an
+            const button = e.target.closest(".deadline_delete_btn"); // pick closest delete_btn
+            if (!button) return; // ignore clicks on non-delete buttons
+        // handle click on delete button
+            const taskid = button.dataset.id;
+
+            try {
+                const response = await fetch(`${window.origin}/delete_deadline`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid
+                    })
+                });
+
+                const answer = await response.text();
+
+                if (answer === "ok") {
+                    button.closest("li").remove();
+                    alertify.success("Task removed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+                console.error("Delete failed:", error);
+                alertify.error("Error connecting to server");
+            }
+        });
+
+
+
+        async function setup_yesterday_todo() {
+            try {
+                let response = await fetch(`${window.origin}/give_yesterday_todo_task`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "c_date": date
+                    })
+                });
+                let list = await response.json();
+                list.forEach(x => {                       /* just like python (for x in list:) */
+
+                    const li = document.createElement("li"); /* creat a new tr tag */
+                    li.classList.add('list-group-item' , 'd-flex', 'justify-content-between', 'align-items-center');
+                    if (x.status === 0) {
+                        li.innerHTML = ` <div class="d-flex flex-wrap align-items-center gap-2"> <span class="fw-semibold yesterday_todo_task" style="font-size: 15px;">${x.task}</span> <small class="text-muted" style="font-size: 13px;">| Status: <span class="text-warning">Pending</span></small> </div> <button class="btn btn-sm btn-success py-0 px-2 complete_btn_todo_yesterdat" data-id="${x.id}"><i class="bi bi-check2"></i> Finish</button> `;
+                    } else {
+                        li.innerHTML = ` <div class="d-flex flex-wrap align-items-center gap-2"> <span class="fw-semibold yesterday_todo_task" style="font-size: 15px;">${x.task}</span> <small class="text-muted" style="font-size: 13px;">| Status: <span class="text-success">Completed</span></small> </div> `;
+                    }
+
+                    document.getElementById("yesterday_todo_tasks").appendChild(li);
+
+                });
+            } catch (error) {
+                console.error("Error in setup_yesterday_todo:", error);
+                alertify.error("Failed to load today's reminder list. Please try again.");
+            }
+        }
+        setup_yesterday_todo();
+
+
+
+                    // complete yesterday todo task
+        document.getElementById("yesterday_todo_tasks").addEventListener("click", async function(ul) {
+            const button = ul.target.closest(".complete_btn_todo_yesterdat");
+            if (!button) return; // ignore clicks on non-cheakbox buttons
+
+
+
+            const taskid = button.dataset.id;
+            const task = button.closest("li").querySelector(".yesterday_todo_task").innerText;                        // not innerHTML because there is <s></s> tag are there in case check box is checked
+            try {
+
+                const response = await fetch(`${window.origin}/update_yesterday_todo_status`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid,
+                    })
+                });
+
+                const answer = await response.text();
+
+                if (answer === "ok") {
+
+                    button.closest("li").innerHTML = ` <div class="d-flex flex-wrap align-items-center gap-2"> <span class="fw-semibold yesterday_todo_task" style="font-size: 15px;">${task}</span> <small class="text-muted" style="font-size: 13px;">| Status: <span class="text-success">Completed</span></small> </div> `;
+
+                    alertify.success("Task completed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+
+                alertify.error("Error connecting to server");
+            }
+        });
+
+
+
+
+
+
+
+                        // tomorrow task
+        async function setup_tomorrow_todo() {
+            try {
+                let response = await fetch(`${window.origin}/give_tomorrow_todo_task`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "c_date": date
+                    })
+                });
+                let list = await response.json();
+                list.forEach(x => {                       /* just like python (for x in list:) */
+
+                    const li = document.createElement("li"); /* creat a new tr tag */
+                    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+
+                    li.innerHTML= ` <div class="fw-semibold tomorrow_todo_task">${x.task}</div> <div class="tomorrow_todo_task_btn_div"> <button class="btn btn-sm me-1 py-0 px-2 tomorrow_todo_task_edit_btn"  style="color: #FFD43B;" data-id="${x.id}"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-outline-danger py-0 px-2 tomorrow_todo_task_delete_btn" data-id="${x.id}"><i class="fas fa-trash"></i></button> </div> `;
+
+                    document.getElementById("tomorrow_todo_tasks").appendChild(li);
+
+                });
+            } catch (error) {
+                console.error("Error in setup_yesterday_todo:", error);
+                alertify.error("Failed to load today's reminder list. Please try again.");
+            }
+        }
+        setup_tomorrow_todo();
+
+
+                    //delete button tomorrow's todo
+        document.getElementById("tomorrow_todo_tasks").addEventListener("click", async function(e) { // this way when ever somting is clicked in tbody_todo fuction will run an
+            const button = e.target.closest(".tomorrow_todo_task_delete_btn"); // pick closest delete_btn
+            if (!button) return; // ignore clicks on non-delete buttons
+        // handle click on delete button
+            const taskid = button.dataset.id;
+
+            try {
+                const response = await fetch(`${window.origin}/delete_todo_task`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid
+                    })
+                });
+
+                const answer = await response.text();
+
+                if (answer === "ok") {
+                    button.closest("li").remove();
+                    alertify.success("Task removed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+                console.error("Delete failed:", error);
+                alertify.error("Error connecting to server");
+            }
+        });
+
+
+
+            // edit button tomorrow todo
+                    // edit button reminder
+        document.getElementById("tomorrow_todo_tasks").addEventListener("click", function(ul) {
+            const button = ul.target.closest(".tomorrow_todo_task_edit_btn");
+            if (!button) return; // ignore clicks on non-delete buttons
+
+
+            const li = button.closest("li")
+            const taskid = button.dataset.id;
+            const o_task = li.querySelector(".tomorrow_todo_task").innerText;
+            const div_textarea = li.querySelector(".tomorrow_todo_task");
+            const div_save = li.querySelector(".tomorrow_todo_task_btn_div");
+
+
+            div_textarea.innerHTML = `<input type="text" class="form-control bg-transparent text-white rounded-4 border-1 white_placeholder input_task_tomorrow_todo" value="${o_task}" placeholder ="Task can not be empty"maxlength="200">`;
+            div_save.innerHTML = `<button class="btn btn-warning m-2 rounded-pill tomorrow_todo_task_edit_btn"> save  </button>`;
+
+
+            li.querySelector(".tomorrow_todo_task_edit_btn").addEventListener("click", async function() {
+                n_task = li.querySelector(".input_task_tomorrow_todo").value
+                if (n_task === ""){
+                    alertify.error("task can not be empty");
+                }else {
+                    try{
+
+                        const response = await fetch(`${window.origin}/edit_todo_task`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                id: taskid,
+                                task: n_task
+                            })
+                        });
+
+                        const answer = await response.text();
+
+                        if (answer === "ok") {
+
+                            div_textarea.innerHTML=  n_task ;
+                            div_save.innerHTML= ` <button class="btn btn-sm me-1 py-0 px-2 tomorrow_todo_task_edit_btn" style="color: #FFD43B;" data-id="${taskid}"><i class="fas fa-edit"></i></button> <button class="btn btn-sm btn-outline-danger py-0 px-2 tomorrow_todo_task_delete_btn" data-id="${taskid}"><i class="fas fa-trash"></i></button> `;
+
+                            alertify.success("Task completed")
+                        } else {
+                            alertify.error("Something went wrong");
+                        }
+                    } catch (error) {
+
+                        alertify.error("Error connecting to server");
+                    }
+                }
+
+
+            });
+        });
+
+            // setup_miscellaneous_task
+        async function setup_miscellaneous_task() {
+            try {
+                let response = await fetch(`${window.origin}/give_miscellaneous_task`, {
+                    method: "POST",
+
+                });
+                let list = await response.json();
+                list.forEach(x => {                       /* just like python (for x in list:) */
+
+                    const li = document.createElement("li"); /* creat a new tr tag */
+                    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'text-white');
+
+                    li.innerHTML= ` <button class="btn btn-sm btn-outline-danger py-0 px-2 delete_btn_miss" data-id="${x.id}">Delete</button> <div class="text-center flex-grow-1 text-break text-truncate" style="font-weight: 500; word-wrap: break-word; overflow-wrap: break-word; white-space: normal;" data-id="${x.id}"> ${x.task} </div> <button class="btn btn-sm btn-outline-success py-0 px-2 complete_btn_miss" data-id="${x.id}">Complete</button> `;
+
+                    document.getElementById("miss_task_ul").appendChild(li);
+
+                });
+            } catch (error) {
+                console.error("Error in setup_yesterday_todo:", error);
+                alertify.error("Failed to load miscellaneous task list. Please try again.");
+            }
+        }
+        setup_miscellaneous_task();
+
+
+            //add new miscellaneous
+        function add_new_miscellaneous(){
+
+            document.getElementById("add_btn_miss").addEventListener("click", function() {
+                const div = document.querySelector(".miss_add_btn_div");
+                div.innerHTML = ` <input type="text" class="form-control bg-transparent text-white rounded-4 border-1 white_placeholder miss_input_task" placeholder="Task can not be empty" maxlength="200"> <div class="text-center mt-3"> <button id="save_btn_miss" type="button" class="btn btn-outline-success">Save</button> </div>`;
+
+
+
+                document.getElementById("save_btn_miss").addEventListener("click", async function() {
+                    task = div.querySelector(".miss_input_task").value;
+                    if (task === ""){
+                        alertify.error("task can not be empty");
+                    }else {
+                        try{
+
+                            const response = await fetch(`${window.origin}/add_miscellaneous_task`, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    c_date: date,
+                                    task: task
+                                })
+                            });
+
+                            const x = await response.json();
+                            //place +add button back
+                            div.innerHTML = ` <button id="add_btn_miss" type="button" class="btn btn-outline-warning"><i class="fa-solid fa-plus"></i> Add</button> `;
+
+                            add_new_miscellaneous(); // !! impratant !! reattach event listner so that add butoon can be used again
+                            //add new task
+                            const new_li = document.createElement("li"); /* creat a new tr tag */
+                            new_li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'text-white');
+
+                            new_li.innerHTML= ` <button class="btn btn-sm btn-outline-danger py-0 px-2 delete_btn_miss" data-id="${x[0].id}">Delete</button> <div class="text-center flex-grow-1 text-break text-truncate" style="font-weight: 500; word-wrap: break-word; overflow-wrap: break-word; white-space: normal;" data-id="${x[0].id}"> ${x[0].task} </div> <button class="btn btn-sm btn-outline-success py-0 px-2 complete_btn_miss" data-id="${x[0].id}">Complete</button> `;
+                            document.getElementById("miss_task_ul").appendChild(new_li);
+                            alertify.success("task added");
+
+
+                        } catch (error) {
+
+                            alertify.error("Error connecting to server");
+                        }
+                    }
+
+
+                });
+            });
+        }
+        add_new_miscellaneous();
+
+        //delete miscellaneouous task
+        document.getElementById("miss_task_ul").addEventListener("click", async function(e) { // this way when ever somting is clicked in tbody_todo fuction will run an
+            const button = e.target.closest(".delete_btn_miss"); // pick closest delete_btn
+            if (!button) return; // ignore clicks on non-delete buttons
+        // handle click on delete button
+            const taskid = button.dataset.id;
+
+            try {
+                const response = await fetch(`${window.origin}/delete_miss_task`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid
+                    })
+                });
+
+                const answer = await response.text();
+
+                if (answer === "ok") {
+                    button.closest("li").remove();
+                    alertify.success("Task removed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+                console.error("Delete failed:", error);
+                alertify.error("Error connecting to server");
+            }
+        });
+
+
+        document.getElementById("miss_task_ul").addEventListener("click", async function(e) { // this way when ever somting is clicked in tbody_todo fuction will run an
+            const button = e.target.closest(".complete_btn_miss"); // pick closest delete_btn
+            if (!button) return; // ignore clicks on non-delete buttons
+        // handle click on delete button
+            const taskid = button.dataset.id;
+
+            try {
+                const response = await fetch(`${window.origin}/complete_miss_task`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        id: taskid,
+                        c_date: date
+                    })
+                });
+
+                const answer = await response.text();
+
+                if (answer === "ok") {
+                    button.closest("li").remove();
+                    alertify.success("Task removed")
+                } else {
+                    alertify.error("Something went wrong");
+                }
+            } catch (error) {
+                console.error("Delete failed:", error);
+                alertify.error("Error connecting to server");
+            }
+        });
+
+
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+
+{% endblock %}

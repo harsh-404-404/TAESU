@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+<main id="main_login">
+
+    <div id="login_div" class="d-flex justify-content-center align-items-center min-vh-100 text-center">
+        <form action="/register" method="POST" class=" rounded shadow register_form contaent-center {% if error %} is-invalid {% endif %}">
+            <div class= "text-center mb-5">
+                <h1 class="login_text">Sign up</h1>
+            </div>
+            <div>
+                <div class="quetions_register">
+                    First name :
+                </div>
+                <input autocomplete="off" autofocus class="input_login " name="name" placeholder="Enter your first name" value="{{ request.form.get('name', '') }}"  type="text"  pattern="[^ ]+" title="Spaces are not allowed" required>
+            </div>
+            <div>
+                <div class="quetions_register">
+                    Username :
+                </div>
+                <input class="input_login" name="username" placeholder="Choose your username" value="{{ request.form.get('username', '') }}" type="text" pattern="[^ ]+" title="Spaces are not allowed" required >
+            </div>
+            <div>
+                <div class="quetions_register">
+                    Password :
+                </div>
+                <input class="input_login" name="password" placeholder="Choose a password" value="{{ request.form.get('password', '') }}" type="password" required >
+            </div>
+            <div>
+                <div class="quetions_register">
+                    Confirm password :
+                </div>
+                <input class="input_login" name="c_password" placeholder="Confirm password" value="{{ request.form.get('c_password', '') }}" type="password" required >
+            </div>
+            <div class="m-4">
+                <h4>Security Questions for Password Recovery</h4>
+            </div>
+            <div class="quetions_register">
+                • What city were you born in?
+            </div>
+            <div>
+                <input class="input_login" name="city" placeholder="Enter city/town/village name" value="{{ request.form.get('city', '') }}" type="text" required >
+            </div>
+            <div class="quetions_register">
+                • What was your first pet's name?
+            </div>
+            <div>
+                <input class="input_login" name="pet" placeholder="Enter name" value="{{ request.form.get('pet', '') }}" type="text" required >
+            </div>
+            <div class="mb-4">
+                <div class="quetions_register">
+                   • E-mail :
+                </div>
+                <input class="input_login" name="email" placeholder="Enter your email address" value="{{ request.form.get('email', '') }}" type="email" required >
+            </div>
+            <div class="mb-4">
+                <lable>Birthdate :</lable>
+                <input class="input_bithdate" name="birthdate" value="{{ request.form.get('birthdate', '') }}" type="date" required >
+            </div>
+
+
+                    {% if error %}
+                        <div class="invalid-feedback d-block text-cente">
+                    <h4>!! {{ error }} !!</h4>
+                        </div>
+                    {% endif %}
+            <button class="button_login" type="submit">Register</button>
+            <div class="text-muted">
+                Already have an account ? <a href="/login">SIGN IN</a>
+            </div>
+        </form>
+    </div>
+</main>
+{% endblock %}

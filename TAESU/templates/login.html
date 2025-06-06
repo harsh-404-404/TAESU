@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+<main id="main_login">
+
+    <!-- Welcome and Full Site Name -->
+    <div class="text-center text-white py-4 m-5">
+        <h1 class="display-4 fw-bold">Welcome to TAESU</h1>
+        <p class="fs-4">Task and Event Schedule Unit</p>
+    </div>
+
+    <!-- Login Form Container -->
+    <div id="login_div" class="d-flex justify-content-center align-items-center text-center m-5">
+        <form action="/login" method="POST" class="rounded shadow login_form content-center {% if error %}is-invalid{% endif %}">
+            <div class="text-center mb-5">
+                <h1 class="login_text">Login</h1>
+            </div>
+            <div class="mb-4">
+                <input autocomplete="off" autofocus class="input_login" name="username" placeholder="Username" value="{{ request.form.get('username', '') }}" required type="text">
+            </div>
+            <div class="mb-4">
+                <input class="input_login" name="password" placeholder="Password" value="{{ request.form.get('password', '') }}" type="password" required>
+            </div>
+            <div class="form_options p-2 align-self-center">
+                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                    <input type="checkbox" name="rememberme" value="yes" {% if request.form.get('rememberme') %}checked{% endif %}> Remember me
+                </label>
+                <a href="/forgotpassword">Forgot password?</a>
+            </div>
+            {% if error %}
+                <div class="invalid-feedback d-block text-center">
+                    <h5>!! {{ error }} !!</h5>
+                </div>
+            {% endif %}
+            <button class="button_login" type="submit">Log In</button>
+            <div class="text-muted">
+                Don't have an account? <a href="/register">SIGN UP</a>
+            </div>
+        </form>
+    </div>
+</main>
+
+{% endblock %}

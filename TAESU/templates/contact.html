@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+    Dashboard
+{% endblock %}
+
+
+{% block main %}
+    <main id="main_contact">
+           <div class="container my-5">
+<div class="container py-5">
+  <!-- Contact Form -->
+  <h2 class=" fw-bold mb-4">Contact Developer</h2>
+
+  <form action="/contact" method="POST">
+    <div class="mb-3">
+      <label for="name" class="form-label ">Your Name</label>
+      <input type="text" class="form-control border-warning white_placeholder text-white" id="name" name="name"placeholder="John Doe" style="background: black;" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="email" class="form-label">Your Email</label>
+      <input type="email" class="form-control border-warning white_placeholder text-white" id="email" name="email" placeholder="you@example.com" style="background: black;"required>
+    </div>
+
+    <div class="mb-3">
+      <label for="message" class="form-label">Message</label>
+      <textarea class="form-control border-warning white_placeholder text-white" name="message" id="message" rows="6" placeholder="Write your message here..." style="background: black;" required></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-warning">Send</button>
+  </form>
+
+  <!-- Social Media Links -->
+  <div class="mt-5">
+    <h2 class="text-warning mb-2">Social Media</h2>
+    <h5 class="text-secondary">Say hi if you like</h5>
+    <ul class="list-unstyled d-flex gap-4 mt-3">
+      <li>
+        <a href="https://www.linkedin.com/in/harsh-bhalala-4670aa361" target="_blank" class="text-warning">
+          <i class="bi bi-linkedin fs-1"></i>
+        </a>
+      </li>
+      <li>
+        <a href="https://github.com/harsh-404-404?tab=overview" target="_blank" class="text-warning">
+          <i class="bi bi-github fs-1"></i>
+        </a>
+      </li>
+      <li>
+        <a href="https://mail.google.com/mail/?view=cm&to=harshbhalala404@gmail.com" target="_blank" class="text-warning">
+          <i class="bi bi-envelope-at fs-1"></i>
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+
+    </main>
+
+{% endblock %}
