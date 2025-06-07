@@ -135,7 +135,7 @@
 {% block main %}{% endblock %}
 
 
-{% if session["user_id"] %}
+
     <footer class="footer">
         <div class="footer-container">
             <!-- About Section -->
@@ -148,7 +148,7 @@
                     <a href="https://mail.google.com/mail/?view=cm&fs=1&to=harshbhalala404@gmail.com&su=Hello&body=I+am+interested+in+connecting+with+you." title="Email"><i class="bi bi-envelope-at"></i></a>
                 </div>
             </div>
-
+{% if session["user_id"] %}
             <!-- Quick Links -->
             <div class="footer-col">
                 <h3>Menu</h3>
@@ -159,7 +159,8 @@
                   <li><a href="/account" title="Account Settings"><i class="bi bi-gear me-2"></i>Account</a></li>
                 </ul>
             </div>
-
+            
+{% endif %}
             <!-- Social Media -->
             <div class="footer-col">
                 <h3>Social Media</h3>
@@ -181,7 +182,7 @@
     </footer>
 </body>
 </html>
-{% endif %}
+
 
     </body>
 <script>// to prevent user form resubmitting the form
