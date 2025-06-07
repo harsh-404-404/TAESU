@@ -1467,9 +1467,33 @@ html, body {
   }
 }
 
-/* Special adjustments for the download card */
-.add_deadline .card {
-  border-radius: 20px !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-}
+/* Add these styles at the end of your CSS file */
 
+/* Mobile-specific fix for reminder text truncation */
+@media (max-width: 768px) {
+    #reminder_for_today_ul .note_reminder,
+    #reminder_for_tomorrow_ul .note_reminder {
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+    }
+    
+    /* Ensure containers allow truncation */
+    #reminder_for_today_ul .div_containg_note,
+    #reminder_for_tomorrow_ul li {
+        overflow: hidden;
+        min-width: 0; /* Crucial for flex children truncation */
+    }
+    
+    /* Adjust flex behavior for proper truncation */
+    #reminder_for_today_ul li {
+        align-items: flex-start;
+    }
+    
+    #reminder_for_today_ul .div_containg_note {
+        flex: 1;
+        min-width: 0; /* Allows text truncation in flex child */
+    }
+}
